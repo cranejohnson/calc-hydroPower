@@ -7,10 +7,11 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Hydropower Flow Duration Curve Method</title>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-    <script type="text/javascript" src="http://data.whitewinter.net/hydro/jsLib/jeditable.js"></script>
-  <script type="text/javascript" src="http://data.whitewinter.net/hydro/jsLib/Highcharts/js/highcharts.js"></script>
-  <script type="text/javascript" src="http://data.whitewinter.net/hydro/jsLib/Highcharts/js/modules/data.js"></script>
-    <script type ="text/javascript" src="http://data.whitewinter.net/hydro/jsLib/Highcharts/js/themes/grid.js"></script>
+  <!--  <script type="text/javascript" src="jquery.jeditable.js"></script> -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jeditable.js/1.7.3/jeditable.min.js"></script>
+  <script type="text/javascript" src="https://code.highcharts.com/highcharts.js"></script>
+  <script type="text/javascript" src="https://code.highcharts.com/modules/data.js"></script>
+  <script type ="text/javascript" src="grid.js"></script>
   <script src="http://code.highcharts.com/modules/exporting.js"></script>
 
   <script>
@@ -102,25 +103,25 @@
     ///////////////////////////////////
 
     function calcNetFlow() {
-    var netFlow = new Array();
-    var gross = hydroData.flowDuration.data;
-    var envFlow = hydroData.flowDuration.envFlow;
+      var netFlow = new Array();
+      var gross = hydroData.flowDuration.data;
+      var envFlow = hydroData.flowDuration.envFlow;
 
-    for (i = 0; i < gross.length; i++){
-      x = gross[i][0];
-      y = gross[i][1] - envFlow;
+      for (i = 0; i < gross.length; i++){
+        x = gross[i][0];
+        y = gross[i][1] - envFlow;
 
-      if (y < 0) {
-      y = 0;
-      var point = lineInterpolate(gross[i-1],gross[i],'y',envFlow);
+        if (y < 0) {
+        y = 0;
+        var point = lineInterpolate(gross[i-1],gross[i],'y',envFlow);
 
-      x = point[0];
-      i = gross.length;
+        x = point[0];
+        i = gross.length;
+        }
+        netFlow.push([x,y]);
       }
-      netFlow.push([x,y]);
-    }
 
-    return netFlow;
+      return netFlow;
     }
 
 
@@ -130,40 +131,88 @@
 
 
   <style>
-    body { font-family:'lucida grande', tahoma, verdana, arial, sans-serif; font-size:11px; }
-    h1 { font-size: 15px; }
-    a { color: #548dc4; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    table.testgrid { border-collapse: collapse; border: 1px solid #CCB; width: 200px; }
-    table.testgrid td, table.testgrid th { padding: 5px; border: 1px solid #E0E0E0; }
-    table.testgrid th { background: #E5E5E5; text-align: left; }
-    input.invalid { background: red; color: #FDFDFD; }
+    
+    body { 
+      font-family:'lucida grande', tahoma, verdana, arial, sans-serif; 
+      font-size:11px; 
+    }
+    h1 { 
+      font-size: 15px; 
+    }
+    a { 
+      color: #548dc4; 
+      text-decoration: none; 
+    }
+    a:hover { 
+      text-decoration: underline; 
+    }
+    table.testgrid { 
+      width: 200px; 
+    }
+
+    th { 
+      background: #E5E5E5; 
+      text-align: left; 
+      padding: 5px;
+    }
+    td {
+      padding: 5px;
+    }  
+    input.invalid { 
+      background: red; 
+      color: #FDFDFD; 
+    }
+
     .editclass {
-    background-color:#99ff99;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    width: 100%;
+       background-color:#99ff99;
+       -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+       box-sizing: border-box;
+       width: 50px;
     }
 
     .envedit,.turbineEdit,.headedit,.editable {
       color:#CC3333;
-      }
+      width: 50px;
+    }
     .chart {
-    width: 600px;
-    float: left;
-    height: 400px;
-    margin: 0 1em 1em 0;
+      width: 600px;
+      float: left;
+      height: 400px;
+      margin: 0 1em 1em 0;
     }
     #main {
-    width : 1200px;
+      width : 950px;
     }
     .results {
       background-color:#C0C0C0;
       font-weight:bold;
       font-size:20px;
     }
-
+    #usgsform {
+      display: inline-block;
+      float: left;
+      padding: 10px;
+      background-color: lightblue;
+    }
+    #outputTable{
+    	display: inline-block;
+    	float: left;
+        padding:10px;
+        background-color:khaki;
+        margin-bottom: 80px;
+    }      
+    #flowDurationTableDiv {
+      width:200px;
+      float:left;
+    }  
+    #inputValues {
+      padding:10px;
+      background-color:whitesmoke;
+      float:left;
+    }   
+      
+    
   </style>
 
 
@@ -171,43 +220,66 @@
   </head>
 
   <body>
+  <h3>Demonstration Hydropower Calculator</h3>
+  <ul>
+    <li> Select a USGS gage and load data</li>
+    <li> Edit input paramters</li>  
+    <li> Adjust flow duration and turbine efficiency curves if needed</li>
+    </ul>  
   <div id ='main'>
     <div id='usgsform'>
-      <div>USGS Site:<input type="text" id="usgsid" value="15514000" size="10"></div>
-      <div>Seasonal Start:<input type="text" id="usgsstart" value="Jan 1" size="6"></div>
-      <div>Seasonal End:<input type="text" id="usgsend" value="Dec 31" size="6"></div>
-      <div>Multiplier:<input type="text" id="usgsmult" value="1" size="4"></div>
-      <input type="button" value="Load USGS Data" onclick="getUSGSData(usgsid.value,usgsstart.value,usgsend.value,usgsmult.value);" />
-      <div id='usgsname'></div>
+      <table>
+        <tr><th colspan ='2'>Select a Gage:</th></tr>
+        <tr><td><div>USGS Site:<input type="text" id="usgsid" value="15514000" size="10"></div></td></tr>
+        <tr><td><div>Seasonal Start:<input type="text" id="usgsstart" value="Jan 1" size="6"></div></td></tr>
+        <tr><td><div>Seasonal End:<input type="text" id="usgsend" value="Dec 31" size="6"></div></td></tr>
+        <tr><td><div>Multiplier:<input type="text" id="usgsmult" value="1" size="4"></div></td></tr>
+        <tr><td><input type="button" value="Load USGS Data" onclick="getUSGSData(usgsid.value,usgsstart.value,usgsend.value,usgsmult.value);" /></td></tr>
+        <tr><td><div id='usgsname'></div></tr></td>
+      </table>
+        
     </div>
-    <div id='flowDurationTableDiv' style= "width:200px;float:left;"></div>
+    <div id='inputValues'>
+      <table class = 'testgrid'>
+        <tbody>
+        <tr ><th colspan = '3'>Click to edit these input values</th></tr>
+      	<tr><td>Turbine Type:</td>
+          <td>
+           <form>
+            <select onChange="updateTurbine(value);">
+              <option value="" selected>Turbine Type:</option>
+              <option value="0" selected>Pelton</option>
 
+              <option value="2">CrossFlow</option>
+              <option value="3">Francis</option>
+              <option value="4">Kaplan</option>
+              <option value="5">Constant</option>
+            </select>
+            </form>         
+          </td>
+        </tr>  
+        <tr><td>Environmental Flow:</td><td style="width:125px; height:25px;"><div id="envFlow" class = "envedit"></div></td><td style="width:125px; height:25px;"><div id="envFlowPercent" class = "envedit">%</div></td></tr>
+        <tr><td>Turbine Capacity (cfs):</td><td style="width:125px; height:25px;"><div id="turbineFlow" class = "turbineEdit"></div></td><td style="width:125px; height:25px;"><div id="turbinePercent" class = "turbineEdit">%</div></td></tr>
+        <tr><td>Turbine Minimum (cfs):</td><td style="width:125px; height:25px;"><div id="turbineMin" class = "turbineEdit"></div></td></tr>
+        <tr><td>Gross Head (ft):</td><td style="width:125px; height:25px;"><div id="grossHead" class = "headedit"></div></td></tr>
+        <tr><td>Head Loss (ft):</td><td style="width:125px; height:25px;"><div id="headLossFt" class = "headedit"></div><td style="width:125px; height:25px;"><div id="headLossPer" class = "headedit"></div></td></tr>
+        </tbody>
+      </table>
+    </div>  
+    <div id='outputTable'>
+      <table class="output">
+        <tr><th colspan = '2'>Hydropower Results:</th></tr>
+          <tr><td>Average Flow (cfs):</td><td style="width:125px; height:25px;"> <div class = "results" div id="avgFlow"></div></td></tr>
+          <tr><td>Net Head (ft):</td><td style="width:125px; height:25px;"><div class = "results" div id="netHead"></div></td></tr>
+          <tr><td>Capacity (Mw):</td><td style="width:125px; height:25px;"><div class = "results" id="capacity"></div></td></tr>
+          <tr><td>Annual Power(KwH x 10<sup>6</sup>):</td><td style="width:125px; height:25px;"><div class= "results"  id="annPower"></div></td></tr>
+          <tr><td>Capacity Factor:</td><td style="width:125px; height:25px;"><div class= "results" id="capFactor"></div></td></tr>
+      </table>   
+    </div>      
+    </br>
+    <div id='flowDurationTableDiv'></div>
     <div id="flowDuration" class = "chart"></div>
-    <table style = "width:300px; margin-bottom: 20px;" class = 'testgrid'><tbody>
-    <tr><td>Average Flow:</td><td style="width:125px; height:25px;"> <div id="avgFlow"></div></td></tr>
-    <tr><td>Environmental Flow:</td><td style="width:125px; height:25px;"><div id="envFlow" class = "envedit"></div></td><td style="width:125px; height:25px;"><div id="envFlowPercent" class = "envedit">%</div></td></tr>
-    <tr><td>Turbine Capacity (cfs):</td><td style="width:125px; height:25px;"><div id="turbineFlow" class = "turbineEdit"></div></td><td style="width:125px; height:25px;"><div id="turbinePercent" class = "turbineEdit">%</div></td></tr>
-    <tr><td>Turbine Minimum (cfs):</td><td style="width:125px; height:25px;"><div id="turbineMin" class = "turbineEdit"></div></td></tr>
-    <tr><td>Gross Head (ft):</td><td style="width:125px; height:25px;"><div id="grossHead" class = "headedit"></div></td></tr>
-    <tr><td>Head Loss (ft):</td><td style="width:125px; height:25px;"><div id="headLossFt" class = "headedit"><td style="width:125px; height:25px;"><div id="headLossPer" class = "headedit"></div></td></tr>
-    <tr><td>Net Head (ft):</td><td style="width:125px; height:25px;"><div id="netHead"></div></td></tr>
-    <tr></tr>
-    <tr><td>Capacity (Mw):</td><td style="width:125px; height:25px;"><div class = "results" id="capacity"></div></td></tr>
-    <tr><td>Annual Power(KwH x 10<sup>6</sup>):</td><td style="width:125px; height:25px;"><div class= "results"  id="annPower"></div></td></tr>
-    <tr><td>Capacity Factor:</td><td style="width:125px; height:25px;"><div class= "results" id="capFactor"></div></td></tr>
-    </tbody>
-    </table><br>
-    <form>
-    <select onChange="updateTurbine(value);">
-      <option value="" selected>Turbine Type:</option>
-      <option value="0" selected>Pelton</option>
-
-      <option value="2">CrossFlow</option>
-      <option value="3">Francis</option>
-      <option value="4">Kaplan</option>
-      <option value="5">Constant</option>
-    </select>
-    </form>
+ 
 
     <div id='turbineTableDiv' style= "width:200px;float:left;"></div>
     <div id="turbine" class = "chart"></div>
@@ -233,7 +305,7 @@
   ///////////////////////////////////
 
   function calcPage(){
-        //Calculate several variables
+    //Calculate several variables
     setCapacityArray('y',hydroData.turbine.capacity.flow,hydroData.turbine.minimum,calcNetFlow());
     hydroData.headData.lossesPer = Math.round(hydroData.headData.lossesFt/(hydroData.headData.forebayElev - hydroData.headData.tailwaterElev)*100);
 
@@ -261,16 +333,16 @@
     //Make editable tables usable after adding new DOM table elements
       $('.editable').on('click', function(){
           $(this).editable(function(value,settings) {
-          return(value);
+              return(value);
           }, {
-          width : 5,
-          cols : 5,
-        callback : function(value,settings) {
-            var tableId = $(this).closest('table').attr('id') ;
-            var parts = tableId.split(".");
-            hydroData[parts[0]].data = tableToJSONData(tableId);
-            updateChart(parts[0]);
-        }
+            type: 'text',
+            cols: 7,
+        	callback : function(value,settings) {
+            	var tableId = $(this).closest('table').attr('id') ;
+            	var parts = tableId.split(".");
+            	hydroData[parts[0]].data = tableToJSONData(tableId);
+            	updateChart(parts[0]);
+        	}
         });
     });
 
@@ -302,17 +374,16 @@
   ///////////////////////////////////
 
   function getUSGSData(site,start,end,mult){
-      document.getElementById('flowDurationTableDiv').innerHTML = 'Loading USGS Data....';
-       $.getJSON('http://www.data.chenabasin.org/hydro/power/usgs_flowduration.php?site='+site+'&start='+start+'&end='+end+'&mult='+mult, function(data) {
-      hydroData.flowDuration.data = data['dur_data'];
-      document.getElementById('flowDurationTableDiv').innerHTML = createTable(hydroData.flowDuration, 'flowDuration.table','testgrid', 'Download');
-      document.getElementById('usgsname').innerHTML = data['name'];
-        updateChart('flowDuration');
-        document.getElementById('envFlowPercent').innerHTML = '%'+Math.round(hydroData.flowDuration.envFlow/curveArea(hydroData.flowDuration.data)*100);
-      setCapacityArray('y',hydroData.turbine.capacity.flow,hydroData.turbine.minimum,calcNetFlow());
-            calcPage();
-
-  });
+    document.getElementById('flowDurationTableDiv').innerHTML = 'Loading USGS Data....';
+	$.getJSON('http://www.data.chenabasin.org/hydroPower/usgs_flowduration.php?site='+site+'&start='+start+'&end='+end+'&mult='+mult, function(data) {
+          hydroData.flowDuration.data = data['dur_data'];
+          document.getElementById('flowDurationTableDiv').innerHTML = createTable(hydroData.flowDuration, 'flowDuration.table','testgrid', 'Download');
+          document.getElementById('usgsname').innerHTML = data['name'];
+          updateChart('flowDuration');
+          document.getElementById('envFlowPercent').innerHTML = '%'+Math.round(hydroData.flowDuration.envFlow/curveArea(hydroData.flowDuration.data)*100);
+          setCapacityArray('y',hydroData.turbine.capacity.flow,hydroData.turbine.minimum,calcNetFlow());
+          calcPage();
+ 	});
    }
 
 
@@ -830,6 +901,9 @@
 
     title: {
     text: 'Flow Duration Data'
+    },
+    subtitle: {
+        text: 'Drag data points to edit flow duration data.'
     }
 
   });
@@ -889,8 +963,7 @@
           $(this).editable(function(value,settings) {
           return(value);
           }, {
-          width : 5,
-          cols : 5,
+          type : 'text',
         callback : function(value,settings) {
             var tableId = $(this).closest('table').attr('id') ;
             var parts = tableId.split(".");
@@ -936,19 +1009,21 @@
     $('.headedit').editable(function(value) {
     return(value);
     }, {
-    callback : function(value, settings) {
-    if($(this).attr("id") == "grossHead"){
-      hydroData.headData.tailwaterElev = hydroData.headData.forebayElev - value;
-      hydroData.headData.lossesFt = hydroData.headData.lossesPer/100* (hydroData.headData.forebayElev - hydroData.headData.tailwaterElev);
-       }
-    if($(this).attr("id") == "headLossFt"){
-          hydroData.headData.lossesFt = value;
-        }
-    if($(this).attr("id") == "headLossPer"){
-          hydroData.headData.lossesFt = (value.replace("%","")/100)*(hydroData.headData.forebayElev - hydroData.headData.tailwaterElev);
-        }
-     calcPage();
-    }
+      onblur : 'submit',
+      type : 'text',
+      callback : function(value, settings) {
+      if($(this).attr("id") == "grossHead"){
+        hydroData.headData.tailwaterElev = hydroData.headData.forebayElev - value;
+        hydroData.headData.lossesFt = hydroData.headData.lossesPer/100* (hydroData.headData.forebayElev - hydroData.headData.tailwaterElev);
+         }
+      if($(this).attr("id") == "headLossFt"){
+            hydroData.headData.lossesFt = value;
+          }
+      if($(this).attr("id") == "headLossPer"){
+            hydroData.headData.lossesFt = (value.replace("%","")/100)*(hydroData.headData.forebayElev - hydroData.headData.tailwaterElev);
+          }
+       calcPage();
+      }
     });
   });
 
@@ -956,9 +1031,9 @@
     $('.editable').editable(function(value,settings) {
     return(value);
     }, {
-      width : 'none',
-      cols : 10,
-    callback : function(value,settings) {
+      onblur : 'submit',
+      type : 'text',
+      callback : function(value,settings) {
       var tableId = $(this).closest('table').attr('id') ;
       var parts = tableId.split(".");
       hydroData[parts[0]].data = tableToJSONData(tableId);
@@ -969,19 +1044,22 @@
   });
 
   $(function() {
-    $('.envedit').editable(function(value) {
-    return(value);
+    $('.envedit').editable(function(value) {     
+    	return(value);
     }, {
-    callback : function(value, settings) {
-    if($(this).attr("id") == "envFlow"){
-      hydroData.flowDuration.envFlow = value;
-      }
-    if($(this).attr("id") == "envFlowPercent"){
-     hydroData.flowDuration.envFlow = Math.round(value.replace("%","")/100*curveArea(hydroData.flowDuration.data));
-       }
-      calcPage();
+      onblur : 'submit',
+      type : 'text',
+      tooltip    :'Click to edit',
+      callback : function(value, settings) {
+        if($(this).attr("id") == "envFlow"){
+          hydroData.flowDuration.envFlow = value;
+        }
+        if($(this).attr("id") == "envFlowPercent"){
+          hydroData.flowDuration.envFlow = Math.round(value.replace("%","")/100*curveArea(hydroData.flowDuration.data));
+        }
+        calcPage();
 
-    }
+      }
     });
   });
 
@@ -989,25 +1067,30 @@
     $('.turbineEdit').editable(function(value) {
     return(value);
     }, {
-    callback : function(value, settings) {
-      var chart = $('#flowDuration').highcharts();
-      if($(this).attr("id") == "turbineFlow"){
-      hydroData.turbine.capacity.flow = Math.round(value);
-      if(hydroData.turbine.minimum > hydroData.turbine.capacity.flow) hydroData.turbine.minimum = hydroData.turbine.capacity.flow;
-      setCapacityArray('y',hydroData.turbine.capacity.flow,hydroData.turbine.minimum,calcNetFlow());
-      }
-      else if($(this).attr("id") == "turbineMin"){
-      hydroData.turbine.minimum = Math.round(value);
-      if(hydroData.turbine.minimum > hydroData.turbine.capacity.flow) hydroData.turbine.minimum = hydroData.turbine.capacity.flow;
-      setCapacityArray('y',hydroData.turbine.capacity.flow,hydroData.turbine.minimum,calcNetFlow());
-      }
-
-      else{
-      hydroData.turbine.capacity.percent = Math.round(value.replace("%",""));
-      setCapacityArray('x',hydroData.turbine.capacity.percent,hydroData.turbine.minimum,calcNetFlow());
-      }
-
-    calcPage();
+     onblur : 'submit',
+     type : 'text',
+      tooltip    :'Click to edit',
+      callback : function(value, settings) {
+        var chart = $('#flowDuration').highcharts();
+        if($(this).attr("id") == "turbineFlow"){
+        	hydroData.turbine.capacity.flow = Math.round(value);
+        	if(hydroData.turbine.minimum > hydroData.turbine.capacity.flow){ 
+          		hydroData.turbine.minimum = hydroData.turbine.capacity.flow;
+        	}  
+        	setCapacityArray('y',hydroData.turbine.capacity.flow,hydroData.turbine.minimum,calcNetFlow());
+        }
+        else if($(this).attr("id") == "turbineMin"){
+        	hydroData.turbine.minimum = Math.round(value);
+        	if(hydroData.turbine.minimum > hydroData.turbine.capacity.flow){
+              	hydroData.turbine.minimum = hydroData.turbine.capacity.flow;
+            }  
+        	setCapacityArray('y',hydroData.turbine.capacity.flow,hydroData.turbine.minimum,calcNetFlow());
+        }
+        else{
+        hydroData.turbine.capacity.percent = Math.round(value.replace("%",""));
+        setCapacityArray('x',hydroData.turbine.capacity.percent,hydroData.turbine.minimum,calcNetFlow());
+        }
+      	calcPage();
 
     }
     });
